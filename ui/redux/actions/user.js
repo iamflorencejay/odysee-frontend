@@ -128,7 +128,6 @@ export function doAuthenticate(
     try {
       await checkAuthBusy();
       const user = await Lbryio.fetchUser(DOMAIN, getDefaultLanguage());
-      console.log('USER:', user); // eslint-disable-line no-console
 
       if (sessionStorageAvailable) window.sessionStorage.removeItem(AUTH_IN_PROGRESS);
 
