@@ -4,7 +4,6 @@ import 'scss/component/_header.scss';
 import { formatCredits } from 'util/format-credits';
 import { useIsMobile } from 'effects/use-screensize';
 import { withRouter } from 'react-router';
-import { useKeycloak } from '@react-keycloak/web';
 import * as ICONS from 'constants/icons';
 import * as PAGES from 'constants/pages';
 import Button from 'component/button';
@@ -17,6 +16,7 @@ import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import SkipNavigationButton from 'component/skipNavigationButton';
 import Tooltip from 'component/common/tooltip';
+import UserOAuthButton from 'component/userOAuthButton';
 import WunderBar from 'component/wunderbar';
 
 type Props = {
@@ -65,7 +65,6 @@ const Header = (props: Props) => {
     sidebarOpen,
     syncError,
     totalBalance,
-    user,
     clearEmailEntry,
     clearPasswordEntry,
     openChangelog,
@@ -80,7 +79,6 @@ const Header = (props: Props) => {
   } = history;
 
   const isMobile = useIsMobile();
-  const { initialized: keycloakReady } = useKeycloak();
 
   // on the verify page don't let anyone escape other than by closing the tab to keep session data consistent
   const isVerifyPage = pathname.includes(PAGES.AUTH_VERIFY);
@@ -169,11 +167,7 @@ const Header = (props: Props) => {
         </>
       ) : !isMobile ? (
         <div className="header__authButtons">
-          {!keycloakReady || user === undefined ? (
-            <Skeleton variant="text" animation="wave" className="header__navigationItem--balanceLoading" />
-          ) : (
-            <Button navigate={`/$/${PAGES.OAUTH}`} button="primary" label={__('Log In')} disabled={user === null} />
-          )}
+          <UserOAuthButton />
         </div>
       ) : (
         <HeaderProfileMenuButton />
