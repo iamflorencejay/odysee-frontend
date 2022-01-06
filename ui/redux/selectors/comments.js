@@ -11,6 +11,7 @@ import {
   selectMyChannelClaimIds,
   selectClaimIdForUri,
   selectClaimIdsByUri,
+  selectMyChannelClaims,
 } from 'redux/selectors/claims';
 import { isClaimNsfw, getChannelFromClaim } from 'util/claim';
 import { selectSubscriptionUris } from 'redux/selectors/subscriptions';
@@ -462,3 +463,9 @@ export const selectChannelMentionData = createCachedSelector(
     };
   }
 )((state, uri, maxCount) => `${String(uri)}:${maxCount}`);
+
+// todo: implement comment_list --mine in SDK so redux can grab with selectCommentIsMine
+export function selectIsCommentMine(state: State, commentAuthorId: string) {
+  const myChannels = selectMyChannelClaims(state);
+  return myChannels && myChannels.some(({ claim_id }) => claim_id === commentAuthorId);
+}

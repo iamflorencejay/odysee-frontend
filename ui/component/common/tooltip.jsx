@@ -8,11 +8,12 @@ type Props = {
   children: Node,
   disableInteractive?: boolean,
   enterDelay?: number,
+  placement?: string,
   title?: string | Node,
 };
 
 function Tooltip(props: Props) {
-  const { arrow = true, children, disableInteractive = true, enterDelay = 300, title } = props;
+  const { arrow = true, children, disableInteractive = true, enterDelay = 300, placement, title } = props;
 
   return (
     <MUITooltip
@@ -20,6 +21,7 @@ function Tooltip(props: Props) {
       disableInteractive={disableInteractive}
       enterDelay={enterDelay}
       enterNextDelay={enterDelay}
+      placement={placement}
       title={title}
     >
       {children}

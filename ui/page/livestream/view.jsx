@@ -1,89 +1,83 @@
 // @flow
-import React from 'react';
 import { lazyImport } from 'util/lazyImport';
-import Page from 'component/page';
-import LivestreamLayout from 'component/livestreamLayout';
-import analytics from 'analytics';
-import moment from 'moment';
 import { LIVESTREAM_STARTS_SOON_BUFFER, LIVESTREAM_STARTED_RECENTLY_BUFFER } from 'constants/livestream';
+import analytics from 'analytics';
+import LivestreamLayout from 'component/livestreamLayout';
+import moment from 'moment';
+import Page from 'component/page';
+import React from 'react';
 
-const LivestreamComments = lazyImport(() => import('component/livestreamComments' /* webpackChunkName: "comments" */));
+const LivestreamChatLayout = lazyImport(() => import('component/livestreamChatLayout' /* webpackChunkName: "chat" */));
 
 type Props = {
-  uri: string,
-  claim: StreamClaim,
-  doSetPlayingUri: ({ uri: ?string }) => void,
-  isAuthenticated: boolean,
-  doUserSetReferrer: (string) => void,
-  channelClaimId: ?string,
-  chatDisabled: boolean,
-  doCommentSocketConnect: (string, string) => void,
-  doCommentSocketDisconnect: (string) => void,
-  doFetchChannelLiveStatus: (string) => void,
   activeLivestreamForChannel: any,
   activeLivestreamInitialized: boolean,
+  channelClaimId: ?string,
+  chatDisabled: boolean,
+  claim: StreamClaim,
+  isAuthenticated: boolean,
+  uri: string,
+  clearPlayingUri: () => void,
+  doCommentSocketConnect: (string) => void,
+  doCommentSocketDisconnect: (string) => void,
+  doFetchChannelLiveStatus: (string) => void,
+  setReferrer: () => void,
 };
 
 export default function LivestreamPage(props: Props) {
   const {
-    uri,
-    claim,
-    doSetPlayingUri,
-    isAuthenticated,
-    doUserSetReferrer,
+    activeLivestreamForChannel,
+    activeLivestreamInitialized,
     channelClaimId,
     chatDisabled,
+    claim,
+    isAuthenticated,
+    uri,
+    clearPlayingUri,
     doCommentSocketConnect,
     doCommentSocketDisconnect,
     doFetchChannelLiveStatus,
-    activeLivestreamForChannel,
-    activeLivestreamInitialized,
+    setReferrer,
   } = props;
+
+  const [activeStreamUri, setActiveStreamUri] = React.useState(false);
+  const [showLivestream, setShowLivestream] = React.useState(false);
+  const [showScheduledInfo, setShowScheduledInfo] = React.useState(false);
+  const [hideComments, setHideComments] = React.useState(false);
+
+  const isInitialized = Boolean(activeLivestreamForChannel) || activeLivestreamInitialized;
+  const isChannelBroadcasting = Boolean(activeLivestreamForChannel);
+  const claimId = claim && claim.claim_id;
+  const isCurrentClaimLive = isChannelBroadcasting && activeLivestreamForChannel.claimId === claimId;
+
+  // $FlowFixMe
+  const release = moment.unix(claim.value.release_time);
+  const stringifiedClaim = JSON.stringify(claim);
 
   React.useEffect(() => {
     // TODO: This should not be needed one we unify the livestream player (?)
     analytics.playerLoadedEvent('livestream', false);
   }, []);
 
-  const claimId = claim && claim.claim_id;
-
   // Establish web socket connection for viewer count.
   React.useEffect(() => {
-    if (claimId) {
-      doCommentSocketConnect(uri, claimId);
-    }
+    if (claimId) doCommentSocketConnect(claimId);
 
     return () => {
-      if (claimId) {
-        doCommentSocketDisconnect(claimId);
-      }
+      if (claimId) doCommentSocketDisconnect(claimId);
     };
-  }, [claimId, uri, doCommentSocketConnect, doCommentSocketDisconnect]);
-
-  const isInitialized = Boolean(activeLivestreamForChannel) || activeLivestreamInitialized;
-  const isChannelBroadcasting = Boolean(activeLivestreamForChannel);
-  const isCurrentClaimLive = isChannelBroadcasting && activeLivestreamForChannel.claimId === claimId;
-  const livestreamChannelId = channelClaimId || '';
+  }, [claimId, doCommentSocketConnect, doCommentSocketDisconnect]);
 
   // Find out current channels status + active live claim.
   React.useEffect(() => {
-    doFetchChannelLiveStatus(livestreamChannelId);
-    const intervalId = setInterval(() => doFetchChannelLiveStatus(livestreamChannelId), 30000);
+    doFetchChannelLiveStatus(channelClaimId);
+    const intervalId = setInterval(() => doFetchChannelLiveStatus(channelClaimId), 30000);
     return () => clearInterval(intervalId);
-  }, [livestreamChannelId, doFetchChannelLiveStatus]);
-
-  const [activeStreamUri, setActiveStreamUri] = React.useState(false);
+  }, [channelClaimId, doFetchChannelLiveStatus]);
 
   React.useEffect(() => {
     setActiveStreamUri(!isCurrentClaimLive && isChannelBroadcasting ? activeLivestreamForChannel.claimUri : false);
   }, [isCurrentClaimLive, isChannelBroadcasting]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // $FlowFixMe
-  const release = moment.unix(claim.value.release_time);
-
-  const [showLivestream, setShowLivestream] = React.useState(false);
-  const [showScheduledInfo, setShowScheduledInfo] = React.useState(false);
-  const [hideComments, setHideComments] = React.useState(false);
 
   React.useEffect(() => {
     if (!isInitialized) return;
@@ -125,25 +119,21 @@ export default function LivestreamPage(props: Props) {
     return () => clearInterval(intervalId);
   }, [chatDisabled, isChannelBroadcasting, release, isCurrentClaimLive, isInitialized]);
 
-  const stringifiedClaim = JSON.stringify(claim);
-
   React.useEffect(() => {
     if (uri && stringifiedClaim) {
       const jsonClaim = JSON.parse(stringifiedClaim);
       if (!isAuthenticated) {
         const uri = jsonClaim.signing_channel && jsonClaim.signing_channel.permanent_url;
-        if (uri) {
-          doUserSetReferrer(uri.replace('lbry://', '')); //
-        }
+        if (uri) setReferrer();
       }
     }
-  }, [uri, stringifiedClaim, isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [uri, stringifiedClaim, isAuthenticated, setReferrer]);
 
   React.useEffect(() => {
     // Set playing uri to null so the popout player doesnt start playing the dummy claim if a user navigates back
     // This can be removed when we start using the app video player, not a LIVESTREAM iframe
-    doSetPlayingUri({ uri: null });
-  }, [doSetPlayingUri]);
+    clearPlayingUri();
+  }, [clearPlayingUri]);
 
   return (
     <Page
@@ -155,7 +145,7 @@ export default function LivestreamPage(props: Props) {
         !hideComments &&
         isInitialized && (
           <React.Suspense fallback={null}>
-            <LivestreamComments uri={uri} />
+            <LivestreamChatLayout uri={uri} />
           </React.Suspense>
         )
       }

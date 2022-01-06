@@ -1,6 +1,6 @@
 // @flow
-import { SORT_COMMENTS_NEW, SORT_COMMENTS_BEST, SORT_COMMENTS_CONTROVERSIAL } from 'constants/comment';
 import { FREE_GLOBAL_STICKERS, PAID_GLOBAL_STICKERS } from 'constants/stickers';
+import { SORT_COMMENTS_NEW, SORT_COMMENTS_BEST, SORT_COMMENTS_CONTROVERSIAL } from 'constants/comment';
 import * as REACTION_TYPES from 'constants/reactions';
 
 const ALL_VALID_STICKERS = [...FREE_GLOBAL_STICKERS, ...PAID_GLOBAL_STICKERS];
@@ -101,5 +101,10 @@ export function parseSticker(comment: string) {
   const stickerName = stickerValue && stickerValue.replace(/<stkr>/g, '');
   const commentIsSticker = stickerValue && stickerValue.length === comment.length;
 
-  return commentIsSticker && ALL_VALID_STICKERS.find((sticker) => sticker.name === stickerName);
+  return commentIsSticker && ALL_VALID_STICKERS.find(({ name }) => name === stickerName);
+}
+
+export function getStickerUrl(comment: string) {
+  const stickerFromComment = parseSticker(comment);
+  return stickerFromComment && stickerFromComment.url;
 }
