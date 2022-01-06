@@ -17,3 +17,9 @@ declare type SubscriptionState = {
   loading: boolean,
   firstRunCompleted: boolean,
 };
+
+declare type SubscriptionArgs = {
+  channelName: string,
+  uri: string,
+  notificationsDisabled?: boolean,
+};

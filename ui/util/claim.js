@@ -108,3 +108,10 @@ export function getChannelFromClaim(claim: ?Claim) {
     ? claim.signing_channel
     : null;
 }
+
+export function getChannelPermanentUrlFromClaim(claim: ?Claim) {
+  if (!claim) return null;
+
+  const channel = getChannelFromClaim(claim);
+  return channel && channel.permanent_url;
+}

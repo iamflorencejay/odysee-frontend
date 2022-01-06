@@ -8,12 +8,6 @@ import { useIsMobile } from 'effects/use-screensize';
 import { ENABLE_UI_NOTIFICATIONS } from 'config';
 import useBrowserNotifications from '$web/component/browserNotificationSettings/use-browser-notifications';
 
-type SubscriptionArgs = {
-  channelName: string,
-  uri: string,
-  notificationsDisabled?: boolean,
-};
-
 type Props = {
   permanentUrl: ?string,
   isSubscribed: boolean,

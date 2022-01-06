@@ -7,12 +7,6 @@ import { parseURI } from 'util/lbryURI';
 import { doAlertWaitingForSync } from 'redux/actions/app';
 import { doToast } from 'redux/actions/notifications';
 
-type SubscriptionArgs = {
-  channelName: string,
-  uri: string,
-  notificationsDisabled?: boolean,
-};
-
 export function doToggleSubscription(
   subscription: SubscriptionArgs,
   followToast: boolean,
