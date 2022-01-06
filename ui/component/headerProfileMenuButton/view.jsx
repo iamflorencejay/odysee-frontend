@@ -6,7 +6,7 @@ import * as ICONS from 'constants/icons';
 import * as PAGES from 'constants/pages';
 import ChannelThumbnail from 'component/channelThumbnail';
 import classnames from 'classnames';
-import HeaderMenuLink from 'component/common/header-menu-link';
+import MenuLinkButton from 'component/common/menu-link';
 import Icon from 'component/common/icon';
 import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
@@ -48,11 +48,11 @@ export default function HeaderProfileMenuButton(props: HeaderMenuButtonProps) {
         <MenuList className="menu__list--header">
           {authenticated ? (
             <>
-              <HeaderMenuLink page={PAGES.UPLOADS} icon={ICONS.PUBLISH} name={__('Uploads')} />
-              <HeaderMenuLink page={PAGES.CHANNELS} icon={ICONS.CHANNEL} name={__('Channels')} />
-              <HeaderMenuLink page={PAGES.CREATOR_DASHBOARD} icon={ICONS.ANALYTICS} name={__('Creator Analytics')} />
-              <HeaderMenuLink page={PAGES.REWARDS} icon={ICONS.REWARDS} name={__('Rewards')} />
-              <HeaderMenuLink page={PAGES.INVITE} icon={ICONS.INVITE} name={__('Invites')} />
+              <MenuLinkButton page={PAGES.UPLOADS} icon={ICONS.PUBLISH} label={__('Uploads')} />
+              <MenuLinkButton page={PAGES.CHANNELS} icon={ICONS.CHANNEL} label={__('Channels')} />
+              <MenuLinkButton page={PAGES.CREATOR_DASHBOARD} icon={ICONS.ANALYTICS} label={__('Creator Analytics')} />
+              <MenuLinkButton page={PAGES.REWARDS} icon={ICONS.REWARDS} label={__('Rewards')} />
+              <MenuLinkButton page={PAGES.INVITE} icon={ICONS.INVITE} label={__('Invites')} />
 
               <MenuItem onSelect={signOut}>
                 <div className="menu__link">
@@ -64,10 +64,10 @@ export default function HeaderProfileMenuButton(props: HeaderMenuButtonProps) {
             </>
           ) : (
             <>
-              <HeaderMenuLink page={PAGES.AUTH_SIGNIN} icon={ICONS.SIGN_IN} name={__('Log In')} />
-              <HeaderMenuLink page={PAGES.AUTH} icon={ICONS.SIGN_UP} name={__('Sign Up')} />
-              <HeaderMenuLink page={PAGES.SETTINGS} icon={ICONS.SETTINGS} name={__('Settings')} />
-              <HeaderMenuLink page={PAGES.HELP} icon={ICONS.HELP} name={__('Help')} />
+              <MenuLinkButton page={PAGES.AUTH_SIGNIN} icon={ICONS.SIGN_IN} label={__('Log In')} />
+              <MenuLinkButton page={PAGES.AUTH} icon={ICONS.SIGN_UP} label={__('Sign Up')} />
+              <MenuLinkButton page={PAGES.SETTINGS} icon={ICONS.SETTINGS} label={__('Settings')} />
+              <MenuLinkButton page={PAGES.HELP} icon={ICONS.HELP} label={__('Help')} />
             </>
           )}
         </MenuList>

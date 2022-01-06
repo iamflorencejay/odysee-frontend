@@ -6,17 +6,17 @@ import Icon from 'component/common/icon';
 
 type Props = {
   icon: string,
-  name: string,
+  label: string,
   page: string,
 };
 
-export default function HeaderMenuLink(props: Props) {
-  const { icon, name, page } = props;
+export default function MenuLinkButton(props: Props) {
+  const { icon, label, page } = props;
 
   return (
-    <MenuLink className="menu__link" as={Link} to={`/$/${page}`}>
+    <MenuLink className="menu__link" as={Link} to={`/$/${page}`} onClick={(e) => e.stopPropagation()}>
       <Icon aria-hidden icon={icon} />
-      {name}
+      {label}
     </MenuLink>
   );
 }
