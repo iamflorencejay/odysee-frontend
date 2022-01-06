@@ -87,6 +87,7 @@ type Props = {
   channelSubCount?: number,
   swipeLayout: boolean,
   showEdit?: boolean,
+  setUnavailable?: (boolean) => void,
 };
 
 const ClaimPreview = forwardRef<any, {}>((props: Props, ref: any) => {
@@ -149,7 +150,10 @@ const ClaimPreview = forwardRef<any, {}>((props: Props, ref: any) => {
     channelSubCount,
     swipeLayout = false,
     showEdit,
+    setUnavailable,
   } = props;
+
+  if (claim === null) setUnavailable(uri);
 
   const isCollection = claim && claim.value_type === 'collection';
   const collectionClaimId = isCollection && claim && claim.claim_id;
@@ -277,10 +281,6 @@ const ClaimPreview = forwardRef<any, {}>((props: Props, ref: any) => {
     }
   }, [isValid, uri, isResolvingUri, shouldFetch, resolveUri]);
 
-  if ((shouldHide && !showNullPlaceholder) || (isLivestream && !ENABLE_NO_SOURCE_CLAIMS)) {
-    return null;
-  }
-
   if (placeholder === 'loading' || (uri && !claim && isResolvingUri)) {
     return <ClaimPreviewLoading isChannel={isChannelUri} type={type} />;
   }
@@ -299,8 +299,8 @@ const ClaimPreview = forwardRef<any, {}>((props: Props, ref: any) => {
     return <ClaimPreviewHidden message={__('This content is hidden')} isChannel={isChannelUri} type={type} />;
   }
 
-  if (!claim && (showNullPlaceholder || empty)) {
-    return empty || <ClaimPreviewNoContent isChannel={isChannelUri} type={type} />;
+  if (!claim) {
+    return <ClaimPreviewLoading isChannel={isChannelUri} type={type} />;
   }
 
   if (!shouldFetch && showUnresolvedClaim && !isResolvingUri && isChannelUri && claim === null) {

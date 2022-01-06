@@ -63,6 +63,7 @@ export default function CollectionPage(props: Props) {
   const [didTryResolve, setDidTryResolve] = React.useState(false);
   const [showInfo, setShowInfo] = React.useState(false);
   const [showEdit, setShowEdit] = React.useState(false);
+  const [unavailableUris, setUnavailable] = React.useState(false);
   const { name, totalItems } = collection || {};
   const isBuiltin = COLLECTIONS_CONSTS.BUILTIN_LISTS.includes(collectionId);
 
@@ -92,6 +93,10 @@ export default function CollectionPage(props: Props) {
       label={__('Clear Edits')}
       onClick={() => deleteCollection(collectionId, COLLECTIONS_CONSTS.COL_KEY_EDITED)}
     />
+  );
+
+  const removeUnavailable = (
+    <Button button="close" icon={ICONS.REFRESH} label={__('Remove all unavailable claims')} onClick={() => {}} />
   );
 
   let titleActions;
@@ -124,7 +129,7 @@ export default function CollectionPage(props: Props) {
           {claim ? claim.value.title || claim.name : collection && collection.name}
         </span>
       }
-      titleActions={titleActions}
+      titleActions={unavailableUris ? removeUnavailable : titleActions}
       subtitle={subTitle}
       body={
         <CollectionActions
@@ -192,7 +197,7 @@ export default function CollectionPage(props: Props) {
         <div className={classnames('section card-stack')}>
           {info}
           {isMyCollection && showEdit && __('Do the sort')}
-          <ClaimList uris={collectionUrls} collectionId={collectionId} showEdit={showEdit} />
+          <ClaimList uris={collectionUrls} collectionId={collectionId} showEdit={showEdit} setUnavailable={setUnavailable} />
         </div>
       </Page>
     );

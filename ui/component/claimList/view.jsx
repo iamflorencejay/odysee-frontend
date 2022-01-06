@@ -49,6 +49,7 @@ type Props = {
   loadedCallback?: (number) => void,
   swipeLayout: boolean,
   showEdit?: boolean,
+  setUnavailable?: (boolean) => void,
 };
 
 export default function ClaimList(props: Props) {
@@ -84,6 +85,7 @@ export default function ClaimList(props: Props) {
     loadedCallback,
     swipeLayout = false,
     showEdit,
+    setUnavailable,
   } = props;
 
   const [currentSort, setCurrentSort] = usePersistedState(persistedStorageKey, SORT_NEW);
@@ -231,6 +233,7 @@ export default function ClaimList(props: Props) {
                 onClick={handleClaimClicked}
                 swipeLayout={swipeLayout}
                 showEdit={showEdit}
+                setUnavailable={setUnavailable}
               />
             </React.Fragment>
           ))}
