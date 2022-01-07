@@ -13,6 +13,7 @@ const Comments = {
     Comments.isCustomServer = Comments.url !== COMMENT_SERVER_API;
   },
 
+  channel_status: (params: ChannelStatusParams) => fetchCommentsApi('channel.Status', params),
   moderation_block: (params: ModerationBlockParams) => fetchCommentsApi('moderation.Block', params),
   moderation_unblock: (params: ModerationBlockParams) => fetchCommentsApi('moderation.UnBlock', params),
   moderation_block_list: (params: BlockedListArgs) => fetchCommentsApi('moderation.BlockedList', params),
