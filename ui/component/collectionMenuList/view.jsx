@@ -1,28 +1,31 @@
 // @flow
-import * as ICONS from 'constants/icons';
-import * as MODALS from 'constants/modal_types';
-import React from 'react';
-import classnames from 'classnames';
-import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button';
-import Icon from 'component/common/icon';
-import * as PAGES from 'constants/pages';
-import { useHistory } from 'react-router';
 import { formatLbryUrlForWeb, generateListSearchUrlParams } from 'util/url';
+import { Menu, MenuButton, MenuList } from '@reach/menu-button';
+import { useHistory } from 'react-router';
+import * as ICONS from 'constants/icons';
+import * as PAGES from 'constants/pages';
+import classnames from 'classnames';
+import Icon from 'component/common/icon';
+import MenuItemButton from 'component/common/menu-item';
+import MenuLinkButton from 'component/common/menu-link';
+import React from 'react';
 
 type Props = {
-  inline?: boolean,
-  doOpenModal: (string, {}) => void,
-  collectionName?: string,
   collectionId: string,
-  playNextUri: string,
+  inline?: boolean,
+  shuffleList?: any,
   doToggleShuffleList: (string) => void,
+  openDeleteModal: (string) => void,
 };
 
 function CollectionMenuList(props: Props) {
-  const { inline = false, collectionId, collectionName, doOpenModal, playNextUri, doToggleShuffleList } = props;
-  const [doShuffle, setDoShuffle] = React.useState(false);
+  const { collectionId, inline = false, shuffleList, doToggleShuffleList, openDeleteModal } = props;
 
   const { push } = useHistory();
+  const [doShuffle, setDoShuffle] = React.useState(false);
+
+  const shuffle = shuffleList && shuffleList.collectionId === collectionId && shuffleList.newUrls;
+  const playNextUri = shuffle && shuffle[0];
 
   React.useEffect(() => {
     if (playNextUri && doShuffle) {
@@ -47,45 +50,32 @@ function CollectionMenuList(props: Props) {
       >
         <Icon size={20} icon={ICONS.MORE_VERTICAL} />
       </MenuButton>
+
       <MenuList className="menu__list">
-        {collectionId && collectionName && (
+        {collectionId && (
           <>
-            <MenuItem className="comment__menu-option" onSelect={() => push(`/$/${PAGES.LIST}/${collectionId}`)}>
-              <a className="menu__link" href={`/$/${PAGES.LIST}/${collectionId}`}>
-                <Icon aria-hidden icon={ICONS.VIEW} />
-                {__('View List')}
-              </a>
-            </MenuItem>
-            <MenuItem
-              className="comment__menu-option"
+            <MenuLinkButton page={`${PAGES.LIST}/${collectionId}`} icon={ICONS.VIEW} label={__('View List')} />
+
+            <MenuItemButton
               onSelect={() => {
                 doToggleShuffleList(collectionId);
                 setDoShuffle(true);
               }}
-            >
-              <div className="menu__link">
-                <Icon aria-hidden icon={ICONS.SHUFFLE} />
-                {__('Shuffle Play')}
-              </div>
-            </MenuItem>
-            <MenuItem
-              className="comment__menu-option"
-              onSelect={() => push(`/$/${PAGES.LIST}/${collectionId}?view=edit`)}
-            >
-              <div className="menu__link">
-                <Icon aria-hidden icon={ICONS.PUBLISH} />
-                {__('Publish List')}
-              </div>
-            </MenuItem>
-            <MenuItem
-              className="comment__menu-option"
-              onSelect={() => doOpenModal(MODALS.COLLECTION_DELETE, { collectionId })}
-            >
-              <div className="menu__link">
-                <Icon aria-hidden icon={ICONS.DELETE} />
-                {__('Delete List')}
-              </div>
-            </MenuItem>
+              icon={ICONS.SHUFFLE}
+              label={__('Shuffle Play')}
+            />
+
+            <MenuLinkButton
+              page={`${PAGES.LIST}/${collectionId}?view=edit`}
+              icon={ICONS.PUBLISH}
+              label={__('Edit List')}
+            />
+
+            <MenuItemButton
+              onSelect={() => openDeleteModal(collectionId)}
+              icon={ICONS.DELETE}
+              label={__('Delete List')}
+            />
           </>
         )}
       </MenuList>
