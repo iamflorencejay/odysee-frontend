@@ -187,8 +187,8 @@ declare type CommentCreateParams = {
   comment: string,
   claim_id: string,
   parent_id?: string,
-  signature: string,
-  signing_ts: string,
+  signature?: string,
+  signing_ts?: string,
   support_tx_id?: string,
 };
 

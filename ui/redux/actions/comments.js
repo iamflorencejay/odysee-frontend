@@ -18,6 +18,7 @@ import {
 import { makeSelectNotificationForCommentId } from 'redux/selectors/notifications';
 import { selectActiveChannelClaim } from 'redux/selectors/app';
 import { toHex } from 'util/hex';
+import { getTokens } from 'util/saved-passwords';
 import Comments from 'comments';
 import { selectPrefsReady } from 'redux/selectors/sync';
 import { doAlertWaitingForSync } from 'redux/actions/app';
@@ -616,6 +617,7 @@ export function doCommentCreate(
   return async (dispatch: Dispatch, getState: GetState) => {
     const state = getState();
     const activeChannelClaim = selectActiveChannelClaim(state);
+    const tokens = getTokens();
 
     if (!activeChannelClaim) {
       console.error('Unable to create comment. No activeChannel is set.'); // eslint-disable-line
@@ -625,7 +627,7 @@ export function doCommentCreate(
     dispatch({ type: ACTIONS.COMMENT_CREATE_STARTED });
 
     let signatureData;
-    if (activeChannelClaim) {
+    if (tokens.auth_token && activeChannelClaim) {
       try {
         signatureData = await Lbry.channel_sign({
           channel_id: activeChannelClaim.claim_id,
@@ -637,7 +639,7 @@ export function doCommentCreate(
     const notification = parent_id && makeSelectNotificationForCommentId(parent_id)(state);
     if (notification && !notification.is_seen) dispatch(doSeeNotifications([notification.id]));
 
-    if (!signatureData) {
+    if (tokens.auth_token && !signatureData) {
       return dispatch(doToast({ isError: true, message: __('Unable to verify your channel. Please try again.') }));
     }
 
@@ -647,8 +649,7 @@ export function doCommentCreate(
       channel_id: activeChannelClaim.claim_id,
       channel_name: activeChannelClaim.name,
       parent_id: parent_id,
-      signature: signatureData.signature,
-      signing_ts: signatureData.signing_ts,
+      ...(signatureData || {}),
       sticker: sticker,
       ...(txid ? { support_tx_id: txid } : {}),
       ...(payment_intent_id ? { payment_intent_id } : {}),
