@@ -56,8 +56,7 @@ export const doCollectionDelete = (id: string, colKey: ?string = undefined) => (
     });
   if (claim && !colKey) {
     // could support "abandon, but keep" later
-    const { txid, nout } = claim;
-    return dispatch(doAbandonClaim(txid, nout, collectionDelete));
+    return dispatch(doAbandonClaim(claim, collectionDelete));
   }
   return collectionDelete();
 };

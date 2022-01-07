@@ -258,10 +258,7 @@ export default function ClaimMenuList(props: Props) {
                 onSelect={() =>
                   !isRepost && !isChannel
                     ? openModal(MODALS.CONFIRM_FILE_REMOVE, { uri, doGoBack: false })
-                    : openModal(MODALS.CONFIRM_CLAIM_REVOKE, {
-                        claim,
-                        cb: isChannel && (() => replace(`/$/${PAGES.CHANNELS}`)),
-                      })
+                    : openModal(MODALS.CONFIRM_CLAIM_REVOKE, { claim })
                 }
                 icon={ICONS.DELETE}
                 label={__('Delete')}
