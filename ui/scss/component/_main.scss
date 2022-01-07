@@ -173,6 +173,10 @@
     flex-direction: column;
     overflow-wrap: break-word;
 
+    .card__header--between {
+      align-items: flex-start !important;
+    }
+
     .file-page__recommended-collection__row {
       display: block;
 
