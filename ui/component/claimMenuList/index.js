@@ -1,13 +1,8 @@
 import { connect } from 'react-redux';
 import { selectClaimForUri, selectClaimIsMine } from 'redux/selectors/claims';
-import { doCollectionEdit, doFetchItemsInCollection } from 'redux/actions/collections';
+import { doCollectionEdit } from 'redux/actions/collections';
 import { doPrepareEdit } from 'redux/actions/publish';
-import {
-  makeSelectCollectionForIdHasClaimUrl,
-  makeSelectCollectionIsMine,
-  makeSelectEditedCollectionForId,
-  makeSelectUrlsForCollectionId,
-} from 'redux/selectors/collections';
+import { makeSelectCollectionForIdHasClaimUrl, makeSelectCollectionIsMine } from 'redux/selectors/collections';
 import { makeSelectFileInfoForUri } from 'redux/selectors/file_info';
 import * as COLLECTIONS_CONSTS from 'constants/collections';
 import { makeSelectChannelIsMuted } from 'redux/selectors/blocked';
@@ -29,7 +24,6 @@ import { doChannelSubscribe, doChannelUnsubscribe } from 'redux/actions/subscrip
 import { selectIsSubscribedForUri } from 'redux/selectors/subscriptions';
 import { selectUserVerifiedEmail } from 'redux/selectors/user';
 import { selectListShuffle } from 'redux/selectors/content';
-import { doToggleLoopList, doToggleShuffleList } from 'redux/actions/content';
 import { getChannelPermanentUrlFromClaim } from 'util/claim';
 import ClaimPreview from './view';
 import fs from 'fs';
@@ -57,7 +51,6 @@ const select = (state, props) => {
     claimIsMine: selectClaimIsMine(state, claim),
     collectionClaimId,
     contentClaim,
-    editedCollection: makeSelectEditedCollectionForId(collectionClaimId)(state),
     fileInfo: makeSelectFileInfoForUri(permanentUrl)(state),
     hasClaimInFavorites: makeSelectCollectionForIdHasClaimUrl(COLLECTIONS_CONSTS.FAVORITES_ID, permanentUrl)(state),
     hasClaimInWatchLater: makeSelectCollectionForIdHasClaimUrl(COLLECTIONS_CONSTS.WATCH_LATER_ID, permanentUrl)(state),
@@ -65,7 +58,6 @@ const select = (state, props) => {
     isAuthenticated: Boolean(selectUserVerifiedEmail(state)),
     isMyCollection: makeSelectCollectionIsMine(collectionClaimId)(state),
     isSubscribed: selectIsSubscribedForUri(state, channelUri),
-    resolvedList: makeSelectUrlsForCollectionId(collectionClaimId)(state),
     shuffleList,
   };
 };
@@ -109,11 +101,6 @@ const perform = (dispatch) => ({
           : __('Item added to %listName%', { listName }),
       })
     );
-  },
-  fetchCollectionItems: (collectionId) => dispatch(doFetchItemsInCollection({ collectionId })),
-  doToggleShuffleList: (collectionId) => {
-    dispatch(doToggleLoopList(collectionId, false, true));
-    dispatch(doToggleShuffleList(undefined, collectionId, true, true));
   },
 });
 

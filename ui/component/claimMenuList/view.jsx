@@ -1,6 +1,6 @@
 // @flow
 import { buildURI, parseURI } from 'util/lbryURI';
-import { generateShareUrl, generateRssUrl, formatLbryUrlForWeb, generateListSearchUrlParams } from 'util/url';
+import { generateShareUrl, generateRssUrl } from 'util/url';
 import { Menu, MenuButton, MenuList } from '@reach/menu-button';
 import { URL, SHARE_DOMAIN_URL } from 'config';
 import { useHistory } from 'react-router';
@@ -9,6 +9,7 @@ import * as ICONS from 'constants/icons';
 import * as MODALS from 'constants/modal_types';
 import * as PAGES from 'constants/pages';
 import classnames from 'classnames';
+import CollectionMenuItems from 'component/collectionMenuItems';
 import Icon from 'component/common/icon';
 import MenuItemButton from 'component/common/menu-item';
 import MenuLinkButton from 'component/common/menu-link';
@@ -28,7 +29,6 @@ type Props = {
   collectionClaimId: string,
   contentClaim: ?Claim,
   contentSigningChannel: ?Claim,
-  editedCollection: Collection,
   hasClaimInFavorites: boolean,
   hasClaimInWatchLater: boolean,
   inline?: boolean,
@@ -37,13 +37,11 @@ type Props = {
   isChannelPage: boolean,
   isMyCollection: boolean,
   isSubscribed: boolean,
-  resolvedList: boolean,
   shuffleList?: any,
+  isRepost: boolean,
   uri: string,
   copyToClipboard: (string, string, string) => void,
-  doToggleShuffleList: (string) => void,
   editCollection: (string, string, boolean, ?Claim) => void,
-  fetchCollectionItems: (string) => void,
   handleAdminBlock: (boolean, string) => void,
   handleBlock: (boolean, string) => void,
   handleMute: (boolean, string) => void,
@@ -63,7 +61,6 @@ export default function ClaimMenuList(props: Props) {
     collectionClaimId,
     contentClaim,
     contentSigningChannel,
-    editedCollection,
     hasClaimInFavorites,
     hasClaimInWatchLater,
     inline = false,
@@ -72,13 +69,11 @@ export default function ClaimMenuList(props: Props) {
     isChannelPage = false,
     isMyCollection,
     isSubscribed,
-    resolvedList,
     shuffleList,
+    isRepost,
     uri,
     copyToClipboard,
-    doToggleShuffleList,
     editCollection,
-    fetchCollectionItems,
     handleAdminBlock,
     handleBlock,
     handleMute,
@@ -88,7 +83,6 @@ export default function ClaimMenuList(props: Props) {
   } = props;
 
   const { push, replace } = useHistory();
-  const [doShuffle, setDoShuffle] = React.useState(false);
 
   const shuffle = shuffleList && shuffleList.collectionId === collectionClaimId && shuffleList.newUrls;
   const playNextUri = shuffle && shuffle[0];
@@ -109,20 +103,6 @@ export default function ClaimMenuList(props: Props) {
     contentClaim.value.stream_type &&
     (contentClaim.value.stream_type === 'audio' || contentClaim.value.stream_type === 'video');
 
-  React.useEffect(() => {
-    if (doShuffle && resolvedList) {
-      doToggleShuffleList(collectionClaimId);
-
-      if (playNextUri) {
-        push({
-          pathname: formatLbryUrlForWeb(playNextUri),
-          search: generateListSearchUrlParams(collectionClaimId),
-          state: { collectionClaimId, forceAutoplay: true },
-        });
-      }
-    }
-  }, [collectionClaimId, doShuffle, doToggleShuffleList, playNextUri, push, resolvedList]);
-
   if (!claim) return null;
 
   return (
@@ -140,34 +120,7 @@ export default function ClaimMenuList(props: Props) {
       <MenuList className="menu__list">
         {/* COLLECTION OPERATIONS */}
         {isCollection ? (
-          <>
-            <MenuLinkButton page={`${PAGES.LIST}/${collectionClaimId}`} icon={ICONS.VIEW} label={__('View List')} />
-
-            <MenuItemButton
-              onSelect={() => {
-                if (!resolvedList && collectionClaimId) fetchCollectionItems(collectionClaimId);
-                setDoShuffle(true);
-              }}
-              icon={ICONS.SHUFFLE}
-              label={__('Shuffle Play')}
-            />
-
-            {isMyCollection && (
-              <>
-                <MenuLinkButton
-                  page={`${PAGES.LIST}/${collectionClaimId}?view=edit`}
-                  icon={ICONS.PUBLISH}
-                  label={editedCollection ? __('Publish') : __('Edit List')}
-                />
-
-                <MenuItemButton
-                  onSelect={() => openModal(MODALS.COLLECTION_DELETE, { collectionClaimId })}
-                  icon={ICONS.DELETE}
-                  label={__('Delete List')}
-                />
-              </>
-            )}
-          </>
+          <CollectionMenuItems collectionId={collectionClaimId} />
         ) : (
           isAuthenticated &&
           isPlayable && (
