@@ -51,6 +51,7 @@ type Props = {
   openChangelog: ({}) => void,
   setSidebarOpen: (boolean) => void,
   signOut: () => void,
+  doChannelStatus: () => void,
 };
 
 const Header = (props: Props) => {
@@ -72,6 +73,7 @@ const Header = (props: Props) => {
     openChangelog,
     setSidebarOpen,
     signOut,
+    doChannelStatus,
   } = props;
 
   const {
@@ -226,7 +228,15 @@ const Header = (props: Props) => {
               <Button
                 aria-label={__('Status')}
                 className="header__navigationItem--logo"
-                onClick={() => console.log('auth:', authToken, '\naccess:', accessToken, keycloak)}
+                onClick={() => {
+                  console.log('auth:', authToken, '\naccess:', accessToken, keycloak);
+                  doChannelStatus(true).then((result) => {
+                    console.log('result:', result);
+                    if (result.length !== 0) {
+                      doChannelStatus(true);
+                    }
+                  });
+                }}
               >
                 Tokens
               </Button>

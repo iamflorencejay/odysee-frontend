@@ -9,6 +9,7 @@ import { selectUserVerifiedEmail, selectEmailToVerify } from 'redux/selectors/us
 import * as MODALS from 'constants/modal_types';
 import * as SETTINGS from 'constants/settings';
 import Header from './view';
+import { doChannelStatus } from '../../redux/actions/comments';
 
 const select = (state) => ({
   authenticated: selectUserVerifiedEmail(state),
@@ -25,6 +26,7 @@ const perform = (dispatch) => ({
   clearPasswordEntry: () => dispatch(doClearPasswordEntry()),
   signOut: () => dispatch(doSignOut()),
   openChangelog: (modalProps) => dispatch(doOpenModal(MODALS.CONFIRM, modalProps)),
+  doChannelStatus: (sign) => dispatch(doChannelStatus(sign)),
 });
 
 export default connect(select, perform)(Header);
