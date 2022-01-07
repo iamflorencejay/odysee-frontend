@@ -40,7 +40,7 @@ export default function ModalRemoveFile(props: Props) {
             <FormField
               name="claim_abandon"
               label={
-                <I18nMessage tokens={{ lbc: <LbcSymbol postfix={claim.amount} /> }}>
+                <I18nMessage tokens={{ lbc: <LbcSymbol postfix={claim && claim.amount} /> }}>
                   Remove from blockchain (%lbc%)
                 </I18nMessage>
               }

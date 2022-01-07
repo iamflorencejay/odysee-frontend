@@ -87,7 +87,6 @@ export default function ClaimMenuList(props: Props) {
   const shuffle = shuffleList && shuffleList.collectionId === collectionClaimId && shuffleList.newUrls;
   const playNextUri = shuffle && shuffle[0];
 
-  const isRepost = Boolean(claim && claim.reposted_claim);
   const isCollection = Boolean(collectionClaimId);
   const incognitoClaim = !channelUri;
   const isChannel = claim && claim.value_type === 'channel';
