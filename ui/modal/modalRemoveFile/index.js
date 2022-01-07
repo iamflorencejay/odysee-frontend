@@ -1,28 +1,28 @@
 import { connect } from 'react-redux';
 import { doDeleteFileAndMaybeGoBack } from 'redux/actions/file';
-import {
-  selectTitleForUri,
-  makeSelectClaimForUri,
-  makeSelectIsAbandoningClaimForUri,
-  selectClaimIsMineForUri,
-} from 'redux/selectors/claims';
-import { doResolveUri } from 'redux/actions/claims';
 import { doHideModal } from 'redux/actions/app';
+import { doResolveUri } from 'redux/actions/claims';
+import { selectTitleForUri, selectClaimForUri, makeSelectIsAbandoningClaimForUri } from 'redux/selectors/claims';
 import ModalRemoveFile from './view';
 
-const select = (state, props) => ({
-  claimIsMine: selectClaimIsMineForUri(state, props.uri),
-  title: selectTitleForUri(state, props.uri),
-  claim: makeSelectClaimForUri(props.uri)(state),
-  isAbandoning: makeSelectIsAbandoningClaimForUri(props.uri)(state),
-});
+const select = (state, props) => {
+  const { uri } = props;
 
-const perform = (dispatch) => ({
-  closeModal: () => dispatch(doHideModal()),
-  doResolveUri: (uri) => dispatch(doResolveUri(uri)),
-  deleteFile: (uri, deleteFromComputer, abandonClaim, doGoBack) => {
-    dispatch(doDeleteFileAndMaybeGoBack(uri, deleteFromComputer, abandonClaim, doGoBack));
-  },
-});
+  return {
+    claim: selectClaimForUri(state, uri),
+    isAbandoning: makeSelectIsAbandoningClaimForUri(uri)(state),
+    title: selectTitleForUri(state, uri),
+  };
+};
+
+const perform = (dispatch, ownProps) => {
+  const { uri, doGoBack } = ownProps;
+
+  return {
+    closeModal: () => dispatch(doHideModal()),
+    deleteFile: () => dispatch(doDeleteFileAndMaybeGoBack(uri, doGoBack)),
+    doResolveUri: () => dispatch(doResolveUri(uri)),
+  };
+};
 
 export default connect(select, perform)(ModalRemoveFile);

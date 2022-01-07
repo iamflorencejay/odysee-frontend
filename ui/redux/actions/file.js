@@ -5,7 +5,7 @@ import * as ABANDON_STATES from 'constants/abandon_states';
 import { shell } from 'electron';
 // @endif
 import Lbry from 'lbry';
-import { makeSelectClaimForUri } from 'redux/selectors/claims';
+import { selectClaimForUri } from 'redux/selectors/claims';
 import { doAbandonClaim } from 'redux/actions/claims';
 import { batchActions } from 'util/batch-actions';
 
@@ -38,63 +38,23 @@ export function doOpenFileInShell(path: string) {
   };
 }
 
-export function doDeleteFile(outpoint: string, deleteFromComputer?: boolean, abandonClaim?: boolean, cb: any) {
-  return (dispatch: Dispatch) => {
-    if (abandonClaim) {
-      const [txid, nout] = outpoint.split(':');
-      dispatch(doAbandonClaim(txid, Number(nout), cb));
-    }
-
-    // @if TARGET='app'
-    Lbry.file_delete({
-      outpoint,
-      delete_from_download_dir: deleteFromComputer,
-    });
-
-    dispatch({
-      type: ACTIONS.FILE_DELETE,
-      data: {
-        outpoint,
-      },
-    });
-    // @endif
-  };
-}
-
-export function doDeleteFileAndMaybeGoBack(
-  uri: string,
-  deleteFromComputer?: boolean,
-  abandonClaim?: boolean,
-  doGoBack: (any) => void
-) {
+export function doDeleteFileAndMaybeGoBack(uri: string, doGoBack: (any) => void) {
   return (dispatch: Dispatch, getState: GetState) => {
     const state = getState();
     const playingUri = selectPlayingUri(state);
-    const { outpoint } = makeSelectFileInfoForUri(uri)(state) || '';
-    const { nout, txid } = makeSelectClaimForUri(uri)(state);
-    const claimOutpoint = `${txid}:${nout}`;
+    const claim = selectClaimForUri(state, uri);
     const actions = [];
 
-    if (!abandonClaim) {
-      actions.push(doHideModal());
-    }
-
     actions.push(
-      doDeleteFile(outpoint || claimOutpoint, deleteFromComputer, abandonClaim, (abandonState) => {
+      doAbandonClaim(claim, (abandonState) => {
         if (abandonState === ABANDON_STATES.DONE) {
-          if (abandonClaim) {
-            if (doGoBack) {
-              dispatch(goBack());
-            }
-            dispatch(doHideModal());
-          }
+          if (doGoBack) dispatch(goBack());
+          dispatch(doHideModal());
         }
       })
     );
 
-    if (playingUri && playingUri.uri === uri) {
-      actions.push(doSetPlayingUri({ uri: null }));
-    }
+    if (playingUri && playingUri.uri === uri) actions.push(doSetPlayingUri({ uri: null }));
     // it would be nice to stay on the claim if you just want to delete it
     // we need to alter autoplay to not start downloading again after you delete it
 
@@ -105,7 +65,7 @@ export function doDeleteFileAndMaybeGoBack(
 export function doFileGet(uri: string, saveFile: boolean = true, onSuccess?: (GetResponse) => any) {
   return (dispatch: Dispatch, getState: () => any) => {
     const state = getState();
-    const { nout, txid } = makeSelectClaimForUri(uri)(state);
+    const { nout, txid } = selectClaimForUri(state, uri);
     const outpoint = `${txid}:${nout}`;
 
     dispatch({
