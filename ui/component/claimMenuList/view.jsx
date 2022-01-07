@@ -166,11 +166,8 @@ function ClaimMenuList(props: Props) {
     doToast({
       message: source ? __('Item removed from %name%', { name }) : __('Item added to %name%', { name }),
     });
-    doCollectionEdit(collectionId, {
-      claims: [contentClaim],
-      remove: source,
-      type: 'playlist',
-    });
+    const uris = contentClaim && [contentClaim.permanent_url];
+    doCollectionEdit(collectionId, { uris, remove: source, type: 'playlist' });
   }
 
   function handleFollow() {

@@ -443,7 +443,7 @@ const ClaimPreview = forwardRef<any, {}>((props: Props, ref: any) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 // $FlowFixMe
-                                if (editCollection) editCollection(listId, { claims: [claim], remove: true });
+                                if (editCollection) editCollection(listId, { uris: [uri], remove: true });
                               }}
                             />
                           </div>
