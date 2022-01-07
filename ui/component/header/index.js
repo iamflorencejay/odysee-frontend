@@ -5,10 +5,11 @@ import { selectClientSetting } from 'redux/selectors/settings';
 import { selectGetSyncErrorMessage } from 'redux/selectors/sync';
 import { selectHasNavigated } from 'redux/selectors/app';
 import { selectTotalBalance, selectBalance } from 'redux/selectors/wallet';
-import { selectUserVerifiedEmail, selectEmailToVerify, selectUser } from 'redux/selectors/user';
+import { selectUserVerifiedEmail, selectEmailToVerify } from 'redux/selectors/user';
 import * as MODALS from 'constants/modal_types';
 import * as SETTINGS from 'constants/settings';
 import Header from './view';
+import { doChannelStatus } from '../../redux/actions/comments';
 
 const select = (state) => ({
   authenticated: selectUserVerifiedEmail(state),
@@ -18,7 +19,6 @@ const select = (state) => ({
   hideBalance: selectClientSetting(state, SETTINGS.HIDE_BALANCE),
   totalBalance: selectTotalBalance(state),
   syncError: selectGetSyncErrorMessage(state),
-  user: selectUser(state),
 });
 
 const perform = (dispatch) => ({
@@ -26,6 +26,7 @@ const perform = (dispatch) => ({
   clearPasswordEntry: () => dispatch(doClearPasswordEntry()),
   signOut: () => dispatch(doSignOut()),
   openChangelog: (modalProps) => dispatch(doOpenModal(MODALS.CONFIRM, modalProps)),
+  doChannelStatus: (sign) => dispatch(doChannelStatus(sign)),
 });
 
 export default connect(select, perform)(Header);

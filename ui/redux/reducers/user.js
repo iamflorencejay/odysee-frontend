@@ -39,13 +39,23 @@ reducers[ACTIONS.AUTHENTICATION_STARTED] = (state) =>
     accessToken: defaultState.accessToken,
   });
 
-reducers[ACTIONS.AUTHENTICATION_SUCCESS] = (state, action) =>
-  Object.assign({}, state, {
+reducers[ACTIONS.AUTHENTICATION_SUCCESS] = (state, action) => {
+  const newUserState = Object.assign({}, state, {
     authenticationIsPending: false,
     userIsPending: false,
-    accessToken: action.data.accessToken,
-    user: action.data.user,
   });
+
+  if (action.data) {
+    if (action.data.user) {
+      newUserState.user = action.data.user;
+    }
+    if (action.data.accessToken) {
+      newUserState.accessToken = action.data.accessToken;
+    }
+  }
+
+  return newUserState;
+};
 
 reducers[ACTIONS.AUTHENTICATION_FAILURE] = (state) =>
   Object.assign({}, state, {

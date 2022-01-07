@@ -1,6 +1,8 @@
 import { connect } from 'react-redux';
 import { selectHasChannels } from 'redux/selectors/claims';
 import { selectWalletIsEncrypted } from 'redux/selectors/wallet';
+import { doSignOut } from 'redux/actions/app';
+import { doClearEmailEntry, doClearPasswordEntry } from 'redux/actions/user';
 import { doWalletStatus } from 'redux/actions/wallet';
 import { selectUser, selectUserVerifiedEmail } from 'redux/selectors/user';
 import { selectLanguage } from 'redux/selectors/settings';
@@ -15,8 +17,11 @@ const select = (state) => ({
   language: selectLanguage(state),
 });
 
-const perform = (dispatch) => ({
-  doWalletStatus: () => dispatch(doWalletStatus()),
-});
+const perform = {
+  doWalletStatus,
+  doClearPasswordEntry,
+  doClearEmailEntry,
+  doSignOut,
+};
 
 export default connect(select, perform)(SettingAccount);

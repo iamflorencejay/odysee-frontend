@@ -10,6 +10,7 @@ import Icon from 'component/common/icon';
 import NotificationBubble from 'component/notificationBubble';
 import I18nMessage from 'component/i18nMessage';
 import ChannelThumbnail from 'component/channelThumbnail';
+import UserOAuthButton from 'component/userOAuthButton';
 import { useIsMobile, useIsLargeScreen } from 'effects/use-screensize';
 import { GetLinksData } from 'util/buildHomepage';
 import { DOMAIN, ENABLE_UI_NOTIFICATIONS, ENABLE_NO_SOURCE_CLAIMS, CHANNEL_STAKED_LEVEL_LIVESTREAM } from 'config';
@@ -379,12 +380,7 @@ function SideNavigation(props: Props) {
             Sign up to earn %lbc% for you and your favorite creators.
           </I18nMessage>
         </span>
-        <Button
-          button="secondary"
-          label={__('Sign Up')}
-          navigate={`/$/${PAGES.AUTH}?src=sidenav_nudge`}
-          disabled={user === null}
-        />{' '}
+        <UserOAuthButton />
       </div>
     );
 

@@ -21,6 +21,13 @@ declare type Comment = {
   removed?: boolean,
 };
 
+declare type Authorization = {
+  channel_name: string,
+  channel_id: string,
+  signature?: string,
+  signature_ts?: string,
+};
+
 declare type PerChannelSettings = {
   words?: Array<string>,
   comments_enabled?: boolean,
@@ -180,8 +187,8 @@ declare type CommentCreateParams = {
   comment: string,
   claim_id: string,
   parent_id?: string,
-  signature: string,
-  signing_ts: string,
+  signature?: string,
+  signing_ts?: string,
   support_tx_id?: string,
 };
 
@@ -303,4 +310,13 @@ declare type BlockWordParams = {
   signature: string,
   signing_ts: string,
   words: string, // CSV list of containing words to block comment on content
+};
+
+declare type ChannelStatusParams = {
+  MyChannels: Array<Authorization>,
+};
+
+declare type ChannelStatusResponse = {
+  Confirmed: Array<Authorization>,
+  UnConfirmed: Array<Authorization>,
 };

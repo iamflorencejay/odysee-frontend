@@ -18,6 +18,7 @@ import {
 import { makeSelectNotificationForCommentId } from 'redux/selectors/notifications';
 import { selectActiveChannelClaim } from 'redux/selectors/app';
 import { toHex } from 'util/hex';
+import { getTokens } from 'util/saved-passwords';
 import Comments from 'comments';
 import { selectPrefsReady } from 'redux/selectors/sync';
 import { doAlertWaitingForSync } from 'redux/actions/app';
@@ -110,6 +111,49 @@ function resolveCommentronError(commentronMsg: string) {
     // only and most likely not capitalized correctly.
     message: commentronMsg,
     isError: true,
+  };
+}
+
+export function doChannelStatus(sign: boolean) {
+  return async (dispatch: Dispatch, getState: GetState) => {
+    const state = getState();
+    const myChannelClaims = selectMyChannelClaims(state);
+    const param: ChannelStatusParams = { MyChannels: [] };
+
+    for (const claim of myChannelClaims) {
+      param.MyChannels.push({
+        channel_id: claim.claim_id,
+        channel_name: claim.name,
+        ...(sign ? await channelSignData(claim.claim_id, claim.name) : {}),
+      });
+    }
+
+    param.MyChannels.push({
+      channel_id: '134150bb6c05394afbb2c4259d699382f7588b6e',
+      channel_name: '@ip-chans-10',
+      ...(sign ? await channelSignData('134150bb6c05394afbb2c4259d699382f7588b6e', '@ip-chans-10') : {}),
+    });
+
+    return Comments.channel_status(param)
+      .then((res: ChannelStatusResponse) => {
+        const { Confirmed, UnConfirmed } = res;
+        const needToSign = [];
+
+        param.MyChannels.forEach((p: Authorization) => {
+          if (
+            !Confirmed ||
+            !Confirmed.find((x) => x.channel_id === p.channel_id) ||
+            (UnConfirmed && UnConfirmed.find((x) => x.channel_id === p.channel_id))
+          ) {
+            needToSign.push(p);
+          }
+        });
+
+        return needToSign;
+      })
+      .catch((err) => {
+        console.error('err:', err);
+      });
   };
 }
 
@@ -549,8 +593,8 @@ export function doCommentReact(commentId: string, type: string) {
 /**
  *
  * @param comment
- * @param claim_id - File claim id
- * @param parent_id - What is this?
+ * @param claim_id The ID of the claim to create the comment on. Can be a file, livestream, or channel page.
+ * @param parent_id
  * @param uri
  * @param livestream
  * @param sticker
@@ -572,9 +616,8 @@ export function doCommentCreate(
 ) {
   return async (dispatch: Dispatch, getState: GetState) => {
     const state = getState();
-
-    // get active channel that will receive comment and optional tip
     const activeChannelClaim = selectActiveChannelClaim(state);
+    const tokens = getTokens();
 
     if (!activeChannelClaim) {
       console.error('Unable to create comment. No activeChannel is set.'); // eslint-disable-line
@@ -584,7 +627,7 @@ export function doCommentCreate(
     dispatch({ type: ACTIONS.COMMENT_CREATE_STARTED });
 
     let signatureData;
-    if (activeChannelClaim) {
+    if (tokens.auth_token && activeChannelClaim) {
       try {
         signatureData = await Lbry.channel_sign({
           channel_id: activeChannelClaim.claim_id,
@@ -593,28 +636,24 @@ export function doCommentCreate(
       } catch (e) {}
     }
 
-    // send a notification
     const notification = parent_id && makeSelectNotificationForCommentId(parent_id)(state);
     if (notification && !notification.is_seen) dispatch(doSeeNotifications([notification.id]));
 
-    if (!signatureData) {
+    if (tokens.auth_token && !signatureData) {
       return dispatch(doToast({ isError: true, message: __('Unable to verify your channel. Please try again.') }));
     }
 
-    // Comments is a function which helps make calls to the backend
-    // these params passed in POST call.
     return Comments.comment_create({
       comment: comment,
       claim_id: claim_id,
       channel_id: activeChannelClaim.claim_id,
       channel_name: activeChannelClaim.name,
       parent_id: parent_id,
-      signature: signatureData.signature,
-      signing_ts: signatureData.signing_ts,
+      ...(signatureData || {}),
       sticker: sticker,
-      ...(txid ? { support_tx_id: txid } : {}), // add transaction id if it exists
-      ...(payment_intent_id ? { payment_intent_id } : {}), // add payment_intent_id if it exists
-      ...(environment ? { environment } : {}), // add environment for stripe if it exists
+      ...(txid ? { support_tx_id: txid } : {}),
+      ...(payment_intent_id ? { payment_intent_id } : {}),
+      ...(environment ? { environment } : {}),
     })
       .then((result: CommentCreateResponse) => {
         dispatch({
